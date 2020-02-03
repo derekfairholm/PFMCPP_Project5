@@ -60,7 +60,7 @@ namespace Example
 struct House 
 {
     House();
-    ~House() { std::cout << "**** House deconstructor ****" << std::endl; }
+    ~House() {}
     unsigned int numberOfBedrooms { 3 };
     unsigned int numberOfBathrooms { 2 };
     unsigned int totalSquareFootage;
@@ -70,8 +70,9 @@ struct House
 
     void numberBedsAndBaths() 
     { 
-        std::cout << "This house has " << numberOfBedrooms << " bedrooms and " << numberOfBathrooms << " bathrooms." << std::endl;
+        std::cout << "This house has " << this->numberOfBedrooms << " bedrooms and " << this->numberOfBathrooms << " bathrooms." << std::endl;
     }
+
     double estimatedMortgagePayment( double interestRate, double term, double downpaymentUsd );
 
     double projectedValue( int yearsFromCurrentDate, double annualGrowthPercantage )
@@ -81,11 +82,13 @@ struct House
         {
             projectedValue += currentMarketValueUsd * annualGrowthPercantage;
         }
-        std::cout << "In " << yearsFromCurrentDate << " years, the value of this home will have gone from $" << currentMarketValueUsd << " to $" << projectedValue << " assuming a " << (annualGrowthPercantage * 100) << " percent annual growth in value." << std::endl;
+        std::cout << "In " << yearsFromCurrentDate << " years, the value of this home will have gone from $" << this->currentMarketValueUsd << " to $" << projectedValue << " assuming a " << (annualGrowthPercantage * 100) << " percent annual growth in value." << std::endl;
         return projectedValue;
     }
 
-    void sellHouse() { std::cout << "Sold house for market value of: $" << currentMarketValueUsd << std::endl; }
+    void sellHouse() { std::cout << "Sold house for market value of: $" << this->currentMarketValueUsd << std::endl; }
+
+    void printEstimatedMortgagePayment() { std::cout << "Estimated mortgage payment: $" << this->estimatedMortgagePayment( 0.042, 30, 20000 ) << std::endl; }
 };
 
 House::House() :
@@ -101,10 +104,7 @@ double House::estimatedMortgagePayment( double interestRate, double term, double
     double principalLoanAmount = currentMarketValueUsd - downpaymentUsd;
     double monthlyInterestRate = interestRate / 12;
     double totalNumberOfPayments = term * 12;
-
     double estimate = (principalLoanAmount * monthlyInterestRate) / (1 - pow(1 + monthlyInterestRate, -totalNumberOfPayments));
-
-    std::cout << "Estimated mortgage payment: $" << estimate << std::endl;
 
     return estimate;
 }
@@ -119,7 +119,7 @@ struct Job
     bool canWorkRemotely = true;
 
     Job() {}
-    ~Job() { std::cout << "**** Job deconstructor ****" << std::endl; }
+    ~Job() {}
     
     struct EmployeeBenefit
     {
@@ -140,13 +140,14 @@ struct Job
         {
             value += employeeBenefits[i].monetaryValue;
         }
-        std::cout << "Value of benefits is: $" << value << std::endl;
         return value;
     }
 
+    void printMonetaryValueOfBenefits() { std::cout << "Value of benefits is: $" << this->monetaryValueOfBenefits() << std::endl; }
+
     void quitJob()
     {
-        std::cout << "Congratulations! You quit your job that paid: $" << startingSalaryUsd << " per year!" << std::endl;
+        std::cout << "Congratulations! You quit your job that paid: $" << this->startingSalaryUsd << " per year!" << std::endl;
     }
 
     EmployeeBenefit employeeBenefits[3] = { EmployeeBenefit(2500), EmployeeBenefit(5000), EmployeeBenefit(1500) };
@@ -170,14 +171,14 @@ struct Circle
     { 
         diameter = radius * 2.0; 
     }
-    ~Circle() { std::cout << "**** Circle deconstructor ****" << std::endl; } 
+    ~Circle() {} 
 
     double getCircumference();
     double getArea();
 
     void drawCircle()
     {
-        std::cout << "Drawing new circle with radius: " << radius << std::endl;
+        std::cout << "Drawing new circle with radius: " << this->radius << std::endl;
         // A hypothetical function that would render a circle with a given radius.
     }
 
@@ -193,21 +194,18 @@ struct Circle
             currentRadius += increment;
         }
     }
+
+    void printCircumference()
+    {
+        std::cout << "The diameter is: " << this->diameter << " and the circumference is: " << this->getCircumference() << std::endl;
+    }
+
+    void printArea() { std::cout << "Area is: " << this->getArea() << std::endl; }
 };
 
-double Circle::getCircumference()
-{
-    double circumference = M_PI * diameter;
-    std::cout << "The diameter is: " << diameter << " and the circumference is: " << circumference << std::endl;
-    return M_PI * diameter;
-}
+double Circle::getCircumference() { return M_PI * this->diameter; }
 
-double Circle::getArea()
-{
-    double area = M_PI * (pow(radius, 2));
-    std::cout << "Area is: " << area << std::endl;
-    return M_PI * (pow(radius, 2));
-}
+double Circle::getArea() { return M_PI * (pow(radius, 2)); }
 
 /*
  new UDT 4:
@@ -221,9 +219,8 @@ struct Person
     Person() {}
     ~Person() 
     {
-        house.sellHouse();
-        job.quitJob();
-        std::cout << "**** Person deconstructor ****" << std::endl;
+        this->house.sellHouse();
+        this->job.quitJob();
     }
 };
 
@@ -243,7 +240,7 @@ struct Shape
     Shape() {}
     ~Shape() 
     {
-        std::cout << "This shape contained " << circles.size() << " cirlces." << std::endl;
+        std::cout << "This shape contained " << this->circles.size() << " cirlces." << std::endl;
     }
 };
 
@@ -257,12 +254,22 @@ int main()
     //1
     std::cout << "-----------UTD: House---------------" << std::endl;
     House myHouse;
+    std::cout << "This house has " << myHouse.numberOfBedrooms << " bedrooms and " << myHouse.numberOfBathrooms << " bathrooms." << std::endl;
+    myHouse.numberBedsAndBaths();
+    std::cout << "Estimated mortgage payment: $" << myHouse.estimatedMortgagePayment( 0.042, 30, 20000 ) << std::endl;
+    myHouse.printEstimatedMortgagePayment();
     //2
     std::cout << "-----------UTD: Job---------------" << std::endl;
     Job myJob;
+    std::cout << "Value of benefits is: $" << myJob.monetaryValueOfBenefits() << std::endl;
+    myJob.printMonetaryValueOfBenefits();
     //3
     std::cout << "-----------UTD: Circle---------------" << std::endl;
     Circle myCircle(5, 10, 10);
+    std::cout << "The diameter is: " << myCircle.diameter << " and the circumference is: " << myCircle.getCircumference() << std::endl;
+    myCircle.printCircumference();
+    std::cout << "Area is: " << myCircle.getArea() << std::endl;
+    myCircle.printArea();
     //4
     std::cout << "-----------UTD: Person---------------" << std::endl;
     Person myPerson;
@@ -270,4 +277,5 @@ int main()
     std::cout << "-----------UTD: Shape---------------" << std::endl;
     Shape myShape;
     std::cout << "good to go!" << std::endl;
+    std::cout << "-----------UTD Deconstructors---------------" << std::endl;
 }
