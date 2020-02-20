@@ -31,6 +31,7 @@ Create a branch named Part3
 #include <string>
 #include <cmath>
 #include <iostream>
+#include "LeakedObjectDetector.h"
 
 /*
  copied UDT 1:
@@ -67,7 +68,12 @@ struct House
 
     void sellHouse() { std::cout << "Sold house for market value of: $" << this->currentMarketValueUsd << std::endl; }
 
-    void printEstimatedMortgagePayment() { std::cout << "Estimated mortgage payment: $" << this->estimatedMortgagePayment( 0.042, 30, 20000 ) << std::endl; }
+    void printEstimatedMortgagePayment() 
+    { 
+        std::cout << "Estimated mortgage payment: $" << this->estimatedMortgagePayment( 0.042, 30, 20000 ) << std::endl; 
+    }
+
+    JUCE_LEAK_DETECTOR(House) // 3
 };
 
 House::House() :
@@ -87,6 +93,17 @@ double House::estimatedMortgagePayment( double interestRate, double term, double
 
     return estimate;
 }
+
+struct HouseWrapper // 5
+{
+    House* pointerToHouse = nullptr;
+
+    HouseWrapper(House* ptr) : pointerToHouse(ptr) { }
+    ~HouseWrapper()
+    {
+        delete pointerToHouse;
+    }
+};  
 
 /*
  copied UDT 2:
@@ -130,6 +147,19 @@ struct Job
     }
 
     EmployeeBenefit employeeBenefits[3] = { EmployeeBenefit(2500), EmployeeBenefit(5000), EmployeeBenefit(1500) };
+
+    JUCE_LEAK_DETECTOR(Job) // 3
+};
+
+struct JobWrapper  // 5
+{
+    Job* pointerToJob = nullptr;
+
+    JobWrapper(Job* ptr) : pointerToJob(ptr) { }
+    ~JobWrapper()
+    {
+        delete pointerToJob;
+    }
 };
 
 /*
@@ -180,11 +210,24 @@ struct Circle
     }
 
     void printArea() { std::cout << "Area is: " << this->getArea() << std::endl; }
+
+    JUCE_LEAK_DETECTOR(Circle) // 3
 };
 
 double Circle::getCircumference() { return M_PI * this->diameter; }
 
 double Circle::getArea() { return M_PI * (pow(radius, 2)); }
+
+struct CircleWrapper  //  5
+{
+    Circle* pointerToCircle = nullptr;
+
+    CircleWrapper(Circle* ptr) : pointerToCircle(ptr) { }
+    ~CircleWrapper()
+    {
+        delete pointerToCircle;
+    }
+};
 
 /*
  new UDT 4:
@@ -200,6 +243,19 @@ struct Person
     {
         this->house.sellHouse();
         this->job.quitJob();
+    }
+
+    JUCE_LEAK_DETECTOR(Person) // 3
+};
+
+struct PersonWrapper  // 5
+{
+    Person* pointerToPerson = nullptr;
+
+    PersonWrapper(Person* ptr) : pointerToPerson(ptr) { }
+    ~PersonWrapper()
+    {
+        delete pointerToPerson;
     }
 };
 
@@ -221,6 +277,19 @@ struct Shape
     {
         std::cout << "This shape contained " << this->circles.size() << " cirlces." << std::endl;
     }
+
+    JUCE_LEAK_DETECTOR(Shape) // 3
+};
+
+struct ShapeWrapper
+{
+    Shape* pointerToShape = nullptr;
+
+    ShapeWrapper(Shape* ptr) : pointerToShape(ptr) { }
+    ~ShapeWrapper()
+    {
+        delete pointerToShape;
+    }
 };
 
 // 
@@ -231,29 +300,29 @@ int main()
 {
     //1
     std::cout << "-----------UTD: House---------------" << std::endl;
-    House myHouse;
-    std::cout << "This house has " << myHouse.numberOfBedrooms << " bedrooms and " << myHouse.numberOfBathrooms << " bathrooms." << std::endl;
-    myHouse.numberBedsAndBaths();
-    std::cout << "Estimated mortgage payment: $" << myHouse.estimatedMortgagePayment( 0.042, 30, 20000 ) << std::endl;
-    myHouse.printEstimatedMortgagePayment();
+    HouseWrapper houseWrapper(new House);
+    std::cout << "This house has " << houseWrapper.pointerToHouse->numberOfBedrooms << " bedrooms and " << houseWrapper.pointerToHouse->numberOfBathrooms << " bathrooms." << std::endl;
+    houseWrapper.pointerToHouse->numberBedsAndBaths();
+    std::cout << "Estimated mortgage payment: $" << houseWrapper.pointerToHouse->estimatedMortgagePayment( 0.042, 30, 20000 ) << std::endl;
+    houseWrapper.pointerToHouse->printEstimatedMortgagePayment();
     //2
     std::cout << "-----------UTD: Job---------------" << std::endl;
-    Job myJob;
-    std::cout << "Value of benefits is: $" << myJob.monetaryValueOfBenefits() << std::endl;
-    myJob.printMonetaryValueOfBenefits();
+    JobWrapper jobWrapper(new Job);
+    std::cout << "Value of benefits is: $" << jobWrapper.pointerToJob->monetaryValueOfBenefits() << std::endl;
+    jobWrapper.pointerToJob->printMonetaryValueOfBenefits();
     //3
     std::cout << "-----------UTD: Circle---------------" << std::endl;
-    Circle myCircle(5, 10, 10);
-    std::cout << "The diameter is: " << myCircle.diameter << " and the circumference is: " << myCircle.getCircumference() << std::endl;
-    myCircle.printCircumference();
-    std::cout << "Area is: " << myCircle.getArea() << std::endl;
-    myCircle.printArea();
+    CircleWrapper circleWrapper(new Circle(5, 10, 10));
+    std::cout << "The diameter is: " << circleWrapper.pointerToCircle->diameter << " and the circumference is: " << circleWrapper.pointerToCircle->getCircumference() << std::endl;
+    circleWrapper.pointerToCircle->printCircumference();
+    std::cout << "Area is: " << circleWrapper.pointerToCircle->getArea() << std::endl;
+    circleWrapper.pointerToCircle->printArea();
     //4
     std::cout << "-----------UTD: Person---------------" << std::endl;
-    Person myPerson;
+    PersonWrapper personWrapper(new Person);
     //5
     std::cout << "-----------UTD: Shape---------------" << std::endl;
-    Shape myShape;
+    ShapeWrapper shapeWrapper(new Shape);
     std::cout << "good to go!" << std::endl;
     std::cout << "-----------UTD Deconstructors---------------" << std::endl;
 }
