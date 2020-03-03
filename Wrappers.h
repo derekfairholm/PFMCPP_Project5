@@ -1,10 +1,10 @@
 #pragma once 
 
-#include "House.h"
-#include "Job.h"
-#include "Circle.h"
-#include "Person.h"
-#include "Shape.h"
+struct House;
+struct Job;
+struct Circle;
+struct Person;
+struct Shape;
 
 struct HouseWrapper
 {

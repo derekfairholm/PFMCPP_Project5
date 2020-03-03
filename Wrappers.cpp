@@ -1,4 +1,8 @@
 #include "Wrappers.h"
+#include "Job.h"
+#include "Circle.h"
+#include "Person.h"
+#include "Shape.h"
 
 HouseWrapper::HouseWrapper(House* ptr) : pointerToHouse(ptr) { }
 HouseWrapper::~HouseWrapper() { delete pointerToHouse; }
